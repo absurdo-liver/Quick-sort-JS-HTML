@@ -26,8 +26,8 @@
 			#visualizer-container {
 				display: flex;
 				align-items: flex-end;
-				height: 50vh;
-				width: 95vw;
+				height: 35vh;
+				width: 90vw;
 				border: 1px solid #ccc;
 				margin-bottom: 20px;
 				background-color: #ffffff;
@@ -58,9 +58,8 @@
 			.controls {
 				margin-bottom: 1em;
 				display: flex;
-				flex-wrap: wrap;
-				justify-content: center;
-				gap: 8px;
+				flex-direction: column;
+				gap: 1em;
 				background-color: transparent;
 				padding: 0;
 				border-radius: 0;
@@ -69,7 +68,7 @@
 
 			button {
 				height: auto;
-				padding: 8px 16px;
+				padding: 10px 16px;
 				font-size: 14px;
 				cursor: pointer;
 				border: 2px solid #ccc;
@@ -77,6 +76,8 @@
 				background-color: #fff;
 				color: #333;
 				transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+				width: 100%;
+				box-sizing: border-box;
 			}
 
 			button:hover {
@@ -109,9 +110,9 @@
 
 			button#set-length-button,
 			button#submit-array-button {
-				padding: 8px 15px;
+				padding: 10px 15px;
 				margin-top: 5px;
-				align-self: flex-start;
+				align-self: stretch;
 				background-color: #cfcfcf;
 				border-color: #ecf0f1;
 			}
@@ -124,7 +125,8 @@
 			.input-group {
 				display: flex;
 				flex-direction: column;
-				min-width: 180px;
+				min-width: unset;
+				width: 100%;
 			}
 
 			input[type="number"],
@@ -135,11 +137,13 @@
 				border-radius: 4px;
 				font-size: 14px;
 				background-color: #fff;
+				width: 100%;
+				box-sizing: border-box;
 			}
 
 			textarea {
 				height: 10vh;
-				width: 80vw;
+				width: 100%;
 				resize: none;
 			}
 
@@ -147,6 +151,38 @@
 				display: flex;
 				align-items: center;
 				gap: 5px;
+			}
+
+			@media (min-width: 600px) and (min-aspect-ratio: 1/1) {
+				body {
+					flex-direction: row;
+					align-items: flex-start;
+					gap: 1em;
+					padding: 1em;
+				}
+
+				.header {
+					writing-mode: vertical-rl;
+					text-orientation: mixed;
+					margin: 0;
+					padding-right: 1em;
+				}
+
+				#visualizer-container {
+					height: 80vh;
+					flex-grow: 1;
+					width: unset;
+				}
+
+				.controls {
+					width: 300px;
+					flex-direction: column;
+					gap: 8px;
+				}
+
+				button {
+					width: 100%;
+				}
 			}
 		</style>
 	</head>
@@ -324,7 +360,7 @@
 					arrLength = newLength;
 					unsortedArray = randomArray(arrLength);
 					renderArray(unsortedArray);
-          localStorage.setItem('localArrLength', newLength);
+					localStorage.setItem('localArrLength', newLength);
 				} else {
 					alert("Length is invalid. ( 0 - 500 )");
 					arrayLengthInput.value = arrLength;
@@ -381,26 +417,26 @@
 				}
 			}
 
-      function init(){
-        localBarClass = localStorage.getItem('localBarClass');
-        localArrLength = localStorage.getItem('localArrLength');
-        if(localBarClass){
-          barClass = localBarClass;
-          if(barClass === 'sorted'){
-            document.getElementById('pinkComp').checked = false;
-          } else {
-            document.getElementById('pinkComp').checked = true;
-          }
-        }
+			function init() {
+				localBarClass = localStorage.getItem('localBarClass');
+				localArrLength = localStorage.getItem('localArrLength');
+				if (localBarClass) {
+					barClass = localBarClass;
+					if (barClass === 'sorted') {
+						document.getElementById('pinkComp').checked = false;
+					} else {
+						document.getElementById('pinkComp').checked = true;
+					}
+				}
 
-        if(localArrLength){
-          arrLength = parseInt(localArrLength);
-          arrayLengthInput.value = parseInt(localArrLength);
-          unsortedArray = randomArray(arrLength);
-        }
+				if (localArrLength) {
+					arrLength = parseInt(localArrLength);
+					arrayLengthInput.value = parseInt(localArrLength);
+					unsortedArray = randomArray(arrLength);
+				}
 
-        renderArray(unsortedArray);
-      }
+				renderArray(unsortedArray);
+			}
 
 			startButton.addEventListener('click', startVisualization);
 			randButton.addEventListener('click', () => {
@@ -418,11 +454,11 @@
 				} else {
 					renderArray(unsortedArray);
 				}
-        localStorage.setItem('localBarClass', barClass);
+				localStorage.setItem('localBarClass', barClass);
 			});
 			setLengthButton.addEventListener('click', setNewRandomArrayLength);
 			submitArrayButton.addEventListener('click', useCustomArray);
-      window.addEventListener('DOMContentLoaded', init)
+			window.addEventListener('DOMContentLoaded', init);
 		</script>
 	</body>
 
