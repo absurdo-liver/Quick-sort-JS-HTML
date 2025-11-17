@@ -63,7 +63,7 @@ GNU General Public License v3.0
 <summary>Conditions:</summary>
 <ul>
 <li>License and copyright notice ( you're reading it right now )</li>
-<li>State changes</li>
+<li>State changes (latest changes: <a href='https://github.com/absurdo-liver/Quick-sort-JS-HTML/commits/'>here</a>)</li>
 <li>Disclose source</li>
 <li>Same license</li>
 </ul>
