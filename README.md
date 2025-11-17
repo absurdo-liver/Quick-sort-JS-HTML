@@ -64,7 +64,7 @@ GNU General Public License v3.0
 <ul>
 <li>License and copyright notice ( like the one you're reading it right now )</li>
 <li>State changes</li>
-<li>Disclose source ( aka this repository and *me* as the author )</li>
+<li>Disclose source</li>
 <li>Same license</li>
 </ul>
 </details>
