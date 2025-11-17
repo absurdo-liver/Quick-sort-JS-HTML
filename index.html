@@ -184,7 +184,7 @@
 			const arrayLengthInput = document.getElementById('array-length-input');
 			const userArrayInput = document.getElementById('user-array-input');
 
-			var intervalTime = 10;
+			const intervalTime = 10;
 			var arrLength = 100;
 			let unsortedArray = randomArray(arrLength);
 
@@ -301,7 +301,6 @@
 					return;
 				}
 				const generator = quicksortGenerator(arrayToSort, 0, arrayToSort.length - 1);
-
 				const intervalId = setInterval(() => {
 					const result = generator.next();
 
@@ -327,6 +326,7 @@
 					arrLength = newLength;
 					unsortedArray = randomArray(arrLength);
 					renderArray(unsortedArray);
+          localStorage.setItem('localArrLength', newLength);
 				} else {
 					alert("Length is too long. ( 0 - 500 )");
 					arrayLengthInput.value = arrLength;
@@ -383,8 +383,27 @@
 				}
 			}
 
+      function init(){
+        localBarClass = localStorage.getItem('localBarClass');
+        localArrLength = localStorage.getItem('localArrLength');
+        if(localBarClass){
+          barClass = localBarClass;
+          if(barClass === 'sorted'){
+            document.getElementById('pinkComp').checked = false;
+          } else {
+            document.getElementById('pinkComp').checked = true;
+          }
+        }
 
-			renderArray(unsortedArray);
+        if(localArrLength){
+          arrLength = parseInt(localArrLength);
+          arrayLengthInput.value = parseInt(localArrLength);
+          unsortedArray = randomArray(arrLength);
+        }
+
+        renderArray(unsortedArray);
+      }
+
 			startButton.addEventListener('click', startVisualization);
 			randButton.addEventListener('click', () => {
 				unsortedArray = randomArray(arrLength);
@@ -401,9 +420,11 @@
 				} else {
 					renderArray(unsortedArray);
 				}
+        localStorage.setItem('localBarClass', barClass);
 			});
 			setLengthButton.addEventListener('click', setNewRandomArrayLength);
 			submitArrayButton.addEventListener('click', useCustomArray);
+      window.addEventListener('DOMContentLoaded', init)
 		</script>
 	</body>
 
