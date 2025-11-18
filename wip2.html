@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Quicksort Visualizer</title>
+		<style>
+			body {
+				padding: 0.5em;
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				background-color: #e9ecef;
+				color: #333;
+				margin: 0;
+			}
+
+			.header {
+				text-align: center;
+				margin: 0.5em;
+				font-size: 0.8em;
+			}
+
+			#visualizer-container {
+				display: flex;
+				align-items: flex-end;
+				height: 35vh;
+				width: 95vw;
+				border: 1px solid #ccc;
+				margin-bottom: 20px;
+				background-color: #ffffff;
+				padding: 5px;
+				border-radius: 8px;
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+			}
+
+			.bar {
+				flex-grow: 1;
+				background-color: steelblue;
+				margin: 0 1px;
+				transition: background-color 0.2s ease;
+			}
+
+			.bar.pivot {
+				background-color: crimson;
+			}
+
+			.bar.sorted {
+				background-color: mediumseagreen;
+			}
+
+			.bar.sortedPink {
+				background-color: pink;
+			}
+
+			.controls {
+				margin-bottom: 1em;
+				display: flex;
+				flex-direction: column;
+				gap: 1em;
+				background-color: transparent;
+				padding: 0;
+				border-radius: 0;
+				width: 90vw;
+			}
+
+			button {
+				height: auto;
+				padding: 10px 16px;
+				font-size: 14px;
+				cursor: pointer;
+				border: 2px solid #ccc;
+				border-radius: 4px;
+				background-color: #fff;
+				color: #333;
+				transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+				width: 100%;
+				box-sizing: border-box;
+			}
+
+			button:hover {
+				background-color: #f4f4f4;
+				color: #000;
+				border-color: #999;
+			}
+
+			button#start-button {
+				background-color: #3498db;
+				color: white;
+				border-color: #3498db;
+				height: max-content;
+			}
+
+			button#start-button:hover {
+				background-color: #2980b9;
+			}
+
+			button#rand-button {
+				background-color: #cfcfcf;
+				color: #333;
+				border-color: #ecf0f1;
+				height: max-content;
+			}
+
+			button#rand-button:hover {
+				background-color: rgb(187, 189, 190);
+			}
+
+			button#set-length-button,
+			button#submit-array-button {
+				padding: 10px 15px;
+				margin-top: 5px;
+				align-self: stretch;
+				background-color: #cfcfcf;
+				border-color: #ecf0f1;
+			}
+
+			button#set-length-button:hover,
+			button#submit-array-button:hover {
+				background-color: rgb(187, 189, 190);
+			}
+
+			.input-group {
+				display: flex;
+				flex-direction: column;
+				min-width: unset;
+				width: 100%;
+			}
+
+			input[type="number"],
+			textarea {
+				margin-top: 5px;
+				padding: 8px;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+				font-size: 14px;
+				background-color: #fff;
+				width: 100%;
+				box-sizing: border-box;
+			}
+
+			textarea {
+				height: 10vh;
+				width: 100%;
+				resize: none;
+			}
+
+			.options {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+			}
+
+			@media (min-width: 600px) and (min-aspect-ratio: 1/1) {
+				body {
+					flex-direction: row;
+					align-items: flex-start;
+					gap: 1em;
+					padding: 1em;
+				}
+
+				.header {
+					writing-mode: vertical-rl;
+					text-orientation: mixed;
+					margin: 0;
+					padding-right: 1em;
+				}
+
+				#visualizer-container {
+					height: 80vh;
+					flex-grow: 1;
+					width: unset;
+				}
+
+				.controls {
+					width: 300px;
+					flex-direction: column;
+					gap: 8px;
+				}
+
+				button {
+					width: 100%;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="header">
+			<h1>Quicksort Visualizer</h1>
+		</div>
+		<div id="visualizer-container"></div>
+		<div class="controls">
+			<button id="start-button">Start Sorting</button>
+			<button id="rand-button">Randomize Array</button>
+			<div class="input-group">
+				<label for="array-length-input">Random Array Length (1-500):</label>
+				<input type="number" id="array-length-input" value="100" min="1" max="500">
+				<button id="set-length-button">Set Length & Randomize</button>
+			</div>
+			<div class="options">
+				<label><input type="checkbox" id="pinkComp">Pink completion?</label>
+			</div>
+			<div class="input-group">
+				<label for="user-array-input">Enter custom array (CSV):</label>
+				<textarea id="user-array-input" placeholder="e.g., 5, 2, 8, 1, 9"></textarea>
+				<button id="submit-array-button">Use Custom Array</button>
+			</div>
+		</div>
+		<script>
+const container = document.getElementById('visualizer-container');
+const startButton = document.getElementById('start-button');
+const randButton = document.getElementById('rand-button');
+const setLengthButton = document.getElementById('set-length-button');
+const submitArrayButton = document.getElementById('submit-array-button');
+const arrayLengthInput = document.getElementById('array-length-input');
+const userArrayInput = document.getElementById('user-array-input');
+const audioContext = new(window.AudioContext || window.webkitAudioContext)();
+
+const intervalTime = 10;
+var arrLength = 50;
+let unsortedArray = randomArray(arrLength);
+var barClass = 'sorted';
+var isSorted = false;
+
+function playToneForValue(value) {
+	if (audioContext.state === 'suspended') {
+		audioContext.resume();
+	}
+
+	const minFreq = 200;
+	const maxFreq = 1000;
+	const frequency = minFreq + (value / 100) * (maxFreq - minFreq);
+
+	const oscillator = audioContext.createOscillator();
+	const gainNode = audioContext.createGain();
+
+	oscillator.connect(gainNode);
+
+	oscillator.type = 'sine';
+	oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+	gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+	oscillator.start(audioContext.currentTime);
+	oscillator.stop(audioContext.currentTime + 0.030);
+}
+
+function randomArray(length) {
+	isSorted = false;
+	let newArr = [];
+	for (let i = 0; i < length; i++) {
+		let randInt = Math.floor((Math.random() * 99) + 1);
+		let randFloat = Math.round((Math.random() * 9) + 1);
+		let result = parseFloat(`${randInt}.${randFloat}`);
+		newArr.push(result);
+	}
+	return newArr
+}
+
+function renderArray(arr, pivotIndex = null, sortedIndices = []) {
+	container.innerHTML = '';
+	if (arr.length === 0) return;
+	const minValue = Math.min(...arr);
+	const maxValue = Math.max(...arr);
+
+	arr.forEach((item, index) => {
+		const bar = document.createElement('div');
+		const height = (maxValue === minValue) ? 50 : ((item - minValue) / (maxValue - minValue)) * 90 + 10;
+		bar.style.height = `${height}%`;
+		bar.classList.add('bar');
+		bar.title = item.toString();
+
+		if (index === pivotIndex) {
+			bar.classList.add('pivot');
+		} else if (sortedIndices.includes(index)) {
+			bar.classList.add(barClass);
+		}
+		container.appendChild(bar);
+	});
+}
+
+function* quicksortGenerator(arr, low, high) {
+	if (low < high) {
+		const pivotValue = arr[high];
+		let i = low - 1;
+		for (let j = low; j < high; j++) {
+			if (arr[j] < pivotValue) {
+				i++;
+				[arr[i], arr[j]] = [arr[j], arr[i]];
+				yield {
+					arr: [...arr],
+					pivot: high
+				};
+			}
+		}
+		[arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+		const pivotIndex = i + 1;
+		yield {
+			arr: [...arr],
+			pivot: pivotIndex
+		};
+		yield* quicksortGenerator(arr, low, pivotIndex - 1);
+		yield* quicksortGenerator(arr, pivotIndex + 1, high);
+	}
+}
+
+function startVerificationAnimation(arr) {
+	if (audioContext.state === 'suspended') {
+		audioContext.resume();
+	}
+	startButton.disabled = true;
+	randButton.disabled = true;
+	setLengthButton.disabled = true;
+	submitArrayButton.disabled = true;
+	const minValue = Math.min(...arr);
+	const maxValue = Math.max(...arr);
+	const range = maxValue - minValue;
+
+	let verifyIndex = 0;
+	const sortedIndices = [];
+	const verifyInterval = setInterval(() => {
+		if (verifyIndex < arr.length) {
+			sortedIndices.push(verifyIndex);
+			renderArray(arr, null, sortedIndices);
+			const value = arr[verifyIndex];
+			const normalizedValue = range === 0 ? 50 : ((value - minValue) / range) * 100;
+			playToneForValue(normalizedValue);
+			verifyIndex++;
+		} else {
+			clearInterval(verifyInterval);
+			isSorted = true;
+			startButton.disabled = false;
+			randButton.disabled = false;
+			setLengthButton.disabled = false;
+			submitArrayButton.disabled = false;
+		}
+	}, 30);
+}
+
+function startVisualization() {
+	if (audioContext.state === 'suspended') {
+		audioContext.resume();
+	}
+	if (isSorted) {
+		startVerificationAnimation(unsortedArray);
+		return;
+	}
+	startButton.disabled = true;
+	randButton.disabled = true;
+	setLengthButton.disabled = true;
+	submitArrayButton.disabled = true;
+	const arrayToSort = [...unsortedArray];
+	const sortedIndices = [];
+	if (arrayToSort.length === 0) {
+		startVerificationAnimation(unsortedArray);
+		return;
+	}
+	const generator = quicksortGenerator(arrayToSort, 0, arrayToSort.length - 1);
+	const intervalId = setInterval(() => {
+		const result = generator.next();
+		if (!result.done) {
+			const {
+				arr,
+				pivot
+			} = result.value;
+			renderArray(arr, pivot, sortedIndices);
+		} else {
+			clearInterval(intervalId);
+			unsortedArray = arrayToSort;
+			startVerificationAnimation(unsortedArray);
+		}
+	}, intervalTime);
+}
+
+function setNewRandomArrayLength() {
+	const newLength = parseInt(arrayLengthInput.value, 10);
+	if (!isNaN(newLength) && newLength > 0 && newLength <= 500) {
+		arrLength = newLength;
+		unsortedArray = randomArray(arrLength);
+		renderArray(unsortedArray);
+		localStorage.setItem('localArrLength', newLength);
+	} else {
+		alert("Length is invalid. ( 0 - 500 )");
+		arrayLengthInput.value = arrLength;
+	}
+}
+
+function useCustomArray() {
+	const input = userArrayInput.value.trim();
+	let newArrayTemp = input.split(',')
+		.map(item => item.trim())
+		.filter(item => {
+			const floatVal = parseFloat(item);
+			return !isNaN(floatVal) || item === "...";
+		}).map(item => {
+			return item === "..." ? item : parseFloat(item);
+		});
+
+	for (let i = newArrayTemp.length - 1; i >= 0; i--) {
+		if (newArrayTemp[i] === '...') {
+			if (i === 0 || i === newArrayTemp.length - 1) {
+				alert("Invalid usage of '...' at the start or end of the list.");
+				return;
+			}
+			const max = newArrayTemp[i + 1];
+			const min = newArrayTemp[i - 1];
+			const diff = newArrayTemp[i - 1] - newArrayTemp[i - 2];
+			if (typeof min !== 'number' || typeof max !== 'number' || max <= min + 1) {
+				alert(`Invalid range around '...' (between ${min} and ${max}). Max must be > Min + 1 for expansion.`);
+				return;
+			}
+			const numbersToInsert = [];
+			for (let p = min + diff; p < max; p += diff) {
+				numbersToInsert.push(p);
+			}
+			newArrayTemp.splice(i, 1, ...numbersToInsert);
+		}
+	}
+
+	const newArray = newArrayTemp;
+
+	if (newArray.length > 0 && newArray.length <= 500) {
+		unsortedArray = newArray;
+		isSorted = false;
+		renderArray(unsortedArray);
+		arrLength = newArray.length;
+		arrayLengthInput.value = newArray.length;
+	} else if (newArray.length > 500) {
+		alert("The resulting array is too large after expansion. Please limit to 500 items.");
+	} else {
+		alert("Invalid format. Please use CSV (integer/float values only)");
+	}
+}
+
+function init() {
+	localBarClass = localStorage.getItem('localBarClass');
+	localArrLength = localStorage.getItem('localArrLength');
+	if (localBarClass) {
+		barClass = localBarClass;
+		if (barClass === 'sorted') {
+			document.getElementById('pinkComp').checked = false;
+		} else {
+			document.getElementById('pinkComp').checked = true;
+		}
+	}
+
+	if (localArrLength) {
+		arrLength = parseInt(localArrLength);
+		arrayLengthInput.value = parseInt(localArrLength);
+		unsortedArray = randomArray(arrLength);
+	}
+
+	renderArray(unsortedArray);
+}
+
+startButton.addEventListener('click', startVisualization);
+randButton.addEventListener('click', () => {
+	unsortedArray = randomArray(arrLength);
+	renderArray(unsortedArray);
+});
+document.getElementById('pinkComp').addEventListener('change', () => {
+	if (document.getElementById('pinkComp').checked) {
+		barClass = 'sortedPink';
+	} else {
+		barClass = 'sorted';
+	}
+	if (isSorted) {
+		renderArray(unsortedArray, null, Array.from(Array(unsortedArray.length).keys()));
+	} else {
+		renderArray(unsortedArray);
+	}
+	localStorage.setItem('localBarClass', barClass);
+});
+setLengthButton.addEventListener('click', setNewRandomArrayLength);
+submitArrayButton.addEventListener('click', useCustomArray);
+window.addEventListener('DOMContentLoaded', init);
+		</script>
+	</body>
+
+</html>
+
+<!-- console only version:
+const intervalTime = 10;
+var arrLength = 100;
+let unsortedArray = randomArray(arrLength);
+var isSorted = false;
+
+function randomArray(length) {
+    isSorted = false;
+    let newArr = [];
+    for (let i = 0; i < length; i++) {
+        let randInt = Math.floor((Math.random() * 99) + 1);
+        let randFloat = Math.round((Math.random() * 9) + 1);
+        let result = parseFloat(`${randInt}.${randFloat}`);
+        newArr.push(result);
+    }
+    console.log(`\nGenerated new random array (length: ${newArr.length}):`, newArr);
+    console.log();
+    return newArr;
+}
+
+function* quicksortGenerator(arr, low, high) {
+    if (low < high) {
+        const pivotValue = arr[high];
+        let i = low - 1;
+
+        for (let j = low; j < high; j++) {
+            if (arr[j] < pivotValue) {
+                i++;
+                console.log(`${arr[i]} @ index ${i} :swap: ${arr[j]} @ index ${j}`);
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+                yield;
+            }
+        }
+        console.log(`|pivot: ${arr[high]} @ index ${high} :swap: ${arr[i + 1]} @ index ${i + 1}|`);
+        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+        const pivotIndex = i + 1;
+        yield;
+
+        yield* quicksortGenerator(arr, low, pivotIndex - 1);
+        yield* quicksortGenerator(arr, pivotIndex + 1, high);
+    }
+}
+
+
+function startVerificationAnimation(arr) {
+  console.log();
+    let verifyIndex = 0;
+    const verifyInterval = setInterval(() => {
+        if (verifyIndex < arr.length) {
+            verifyIndex++;
+        } else {
+            clearInterval(verifyInterval);
+            isSorted = true;
+            console.log("Final Sorted Array:", unsortedArray);
+        }
+    }, intervalTime);
+}
+
+function startVisualization() {
+    if (isSorted) {
+        startVerificationAnimation(unsortedArray);
+        return;
+    }
+
+    const arrayToSort = [...unsortedArray];
+    if (arrayToSort.length === 0) {
+        startVerificationAnimation(unsortedArray);
+        return;
+    }
+
+    const generator = quicksortGenerator(arrayToSort, 0, arrayToSort.length - 1);
+    const intervalId = setInterval(() => {
+        const result = generator.next();
+
+        if (result.done) {
+            clearInterval(intervalId);
+            unsortedArray = arrayToSort;
+            startVerificationAnimation(unsortedArray);
+        }
+    }, intervalTime);
+}
+
+startVisualization()
+--!>
