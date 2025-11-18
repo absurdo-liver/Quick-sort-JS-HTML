@@ -463,3 +463,88 @@
 	</body>
 
 </html>
+
+<!-- console only version:
+const intervalTime = 10;
+var arrLength = 100;
+let unsortedArray = randomArray(arrLength);
+var isSorted = false;
+
+function randomArray(length) {
+    isSorted = false;
+    let newArr = [];
+    for (let i = 0; i < length; i++) {
+        let randInt = Math.floor((Math.random() * 99) + 1);
+        let randFloat = Math.round((Math.random() * 9) + 1);
+        let result = parseFloat(`${randInt}.${randFloat}`);
+        newArr.push(result);
+    }
+    console.log(`\nGenerated new random array (length: ${newArr.length}):`, newArr);
+    console.log();
+    return newArr;
+}
+
+function* quicksortGenerator(arr, low, high) {
+    if (low < high) {
+        const pivotValue = arr[high];
+        let i = low - 1;
+
+        for (let j = low; j < high; j++) {
+            if (arr[j] < pivotValue) {
+                i++;
+                console.log(`${arr[i]} @ index ${i} :swap: ${arr[j]} @ index ${j}`);
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+                yield;
+            }
+        }
+        console.log(`|pivot: ${arr[high]} @ index ${high} :swap: ${arr[i + 1]} @ index ${i + 1}|`);
+        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+        const pivotIndex = i + 1;
+        yield;
+
+        yield* quicksortGenerator(arr, low, pivotIndex - 1);
+        yield* quicksortGenerator(arr, pivotIndex + 1, high);
+    }
+}
+
+
+function startVerificationAnimation(arr) {
+  console.log();
+    let verifyIndex = 0;
+    const verifyInterval = setInterval(() => {
+        if (verifyIndex < arr.length) {
+            verifyIndex++;
+        } else {
+            clearInterval(verifyInterval);
+            isSorted = true;
+            console.log("Final Sorted Array:", unsortedArray);
+        }
+    }, intervalTime);
+}
+
+function startVisualization() {
+    if (isSorted) {
+        startVerificationAnimation(unsortedArray);
+        return;
+    }
+
+    const arrayToSort = [...unsortedArray];
+    if (arrayToSort.length === 0) {
+        startVerificationAnimation(unsortedArray);
+        return;
+    }
+
+    const generator = quicksortGenerator(arrayToSort, 0, arrayToSort.length - 1);
+    const intervalId = setInterval(() => {
+        const result = generator.next();
+
+        if (result.done) {
+            clearInterval(intervalId);
+            unsortedArray = arrayToSort;
+            startVerificationAnimation(unsortedArray);
+        }
+    }, intervalTime);
+}
+
+startVisualization()
+--!>
